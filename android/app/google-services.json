@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "404562850809",
+    "project_id": "openlibrary-92d68",
+    "storage_bucket": "openlibrary-92d68.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404562850809:android:4e691ac4d4619581cd4328",
+        "android_client_info": {
+          "package_name": "com.example.mybooks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhQ0CoBfF8cihxEoWBogdPHnHbh8A4BQ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404562850809:android:85b2ebae7d5d2517cd4328",
+        "android_client_info": {
+          "package_name": "com.example.openlibrary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhQ0CoBfF8cihxEoWBogdPHnHbh8A4BQ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

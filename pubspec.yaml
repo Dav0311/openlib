@@ -1,0 +1,36 @@
+name: openlibrary
+description: A new Flutter project
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  flutter_test:
+    sdk: flutter
+  syncfusion_flutter_pdfviewer: ^23.1.38
+  provider: ^6.0.5
+  firebase_auth: ^4.10.1
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^2.0.0
+
+
+flutter:
+  uses-material-design: true
+
+assets:
+  - /Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/Apis.pdf
+  - /Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/data.pdf
+  - /Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/Com.pdf
+  - /Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/SQL.pdf
+  - /Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/C.pdf
+  - /Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/buz.pdf
+  - /Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/logo.png
+  # Add more assets if needed
