@@ -79,15 +79,15 @@ class _SignInScreenState extends State<SignInScreen> {
   void initState() {
     super.initState();
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('UICT Open Library'),
-        backgroundColor: Color.fromARGB(235, 3, 41, 67),
-      ),
-      body: Center(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('UICT Open Library'),
+      backgroundColor: Color.fromARGB(235, 3, 41, 67),
+    ),
+    body: SingleChildScrollView( // Wrap with SingleChildScrollView
+      child: Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Column(
@@ -159,6 +159,8 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
