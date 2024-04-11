@@ -1,58 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:openlibrary/courseScreens/BusAdmin.dart';
-import 'package:openlibrary/courseScreens/InfoTech.dart';
-import 'MyBooksScreen.dart';
-import 'courseScreens/ICTDiploma.dart';
-import 'courseScreens/ComEngineer.dart';
-import 'courseScreens/Electrical.dart';
-import 'courseScreens/ComputerScience.dart';
-import 'SettingsScreen.dart';
+import 'package:openlibrary/MyBooksScreen.dart';
+import 'package:openlibrary/SettingsScreen.dart';
+
+import 'package:openlibrary/courses/course_details.dart';
+import 'package:openlibrary/models/Course.dart';
+import 'package:openlibrary/models/CourseUnit.dart';
+import 'package:openlibrary/models/Document.dart';
+
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:flutter/src/material/icons.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Navigator(
-        onGenerateRoute: (settings) {
-          switch (settings.name) {
-            case '/':
-              return MaterialPageRoute(builder: (_) => HomeScreen());
-            case '/MyBooksScreen':
-              return MaterialPageRoute(builder: (_) => MyBooksScreen());
-            case '/SettingsScreen':
-              return MaterialPageRoute(builder: (_) => SettingsScreen());
-            case '/ICTDiploma':
-              return MaterialPageRoute(builder: (_) => ICTDiplomaScreen(pdfPath: 'assets/Apis.pdf',));
-            case '/ComEngineer':
-              return MaterialPageRoute(builder: (_) => ComEngineerScreen(pdfPath: 'assets/Com.pdf',));
-            case '/Electrical':
-              return MaterialPageRoute(builder: (_) => ElectricalScreen(pdfPath: 'assets/data.pdf',));
-            case '/ComputerScience':
-              return MaterialPageRoute(builder: (_) => ComputerScienceScreen(pdfPath: 'assets/SQL.pdf',));
-            case '/InfoTech':
-              return MaterialPageRoute(builder: (_) => InfoTechScreen(pdfPath: 'assets/C.pdf',));
-            case '/BusAdmin':
-              return MaterialPageRoute(builder: (_) => BusAdminScreen(pdfPath: 'assets/buz.pdf',));
-            case '/PDFViewerScreen':
-              final pdfPath = settings.arguments as String;
-              return MaterialPageRoute(
-                builder: (_) => PDFViewerScreen(pdfPath: pdfPath),
-              );
-            default:
-              return null;
-          }
-        },
-      ),
-    );
-  }
-
-}
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PDFViewerScreen extends StatelessWidget {
   final String pdfPath;
@@ -71,45 +31,20 @@ class PDFViewerScreen extends StatelessWidget {
   }
 }
 
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
-class HomeScreen extends StatelessWidget {
-  final List<String> departmentNames = [
-    'ICTechnology',
-    'Com Engineering',
-    'EE Engineering',
-    'Computer Science',
-    'Information Technology Business',
-    'Business Administration (DBA)',
-    'Records & Archives Management',
-    'Accounting & Finance (DA)',
-    'Procurement & Logistics Management',
-    'NCIT',
-    'NCCE',
-    'NCEE',
-    'NCBA',
-    'Higher Education Certificate', // New department
-    'Higher Education Certificate', // New department
-  ];
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<Course>> cpdDocuments;
+  late List<Document> fetchedData = [];
 
-  final List<IconData> departmentIcons = [
-  Icons.settings_input_antenna_sharp, // Use valid icons like this
-  Icons.waves,
-  Icons.grid_3x3,
-  Icons.computer_rounded,
-  Icons.perm_device_information,
-  Icons.business,
-  Icons.book_sharp,
-  Icons.money,
-  Icons.airplanemode_active_sharp,
-  Icons.business,
-  Icons.school,
-  Icons.computer,
-  Icons.book_online_sharp,
-  Icons.school,
-  Icons.menu,
-];
-
-
+  @override
+  void initState() {
+    super.initState();
+    cpdDocuments = getDocuments();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,26 +53,47 @@ class HomeScreen extends StatelessWidget {
         title: Text('COURSES'),
         backgroundColor: Color.fromARGB(235, 3, 41, 67),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: ScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, // 3 columns
-              ),
-              itemBuilder: (context, index) {
-                final name = departmentNames[index];
-                final icon = departmentIcons[index];
-                return _buildDepartmentTile(name, icon, context);
-              },
-              itemCount: departmentNames.length,
-            ),
-          ),
-        ],
-      ),
-
+      body: FutureBuilder(
+          future: cpdDocuments,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              // return Text('Error: ${snapshot.error}');
+              return const Center(
+                child: Text("An error occurred. Please try again later"),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              // return const Text('No data available');
+              return const Center(
+                child: Column(
+                  children: [
+                    Text("No data available"),
+                  ],
+                ),
+              );
+            } else {
+              return Column(
+                children: [
+                  Expanded(
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: ScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, // 3 columns
+                      ),
+                      itemBuilder: (context, index) {
+                        final data = snapshot.data![index];
+                        // final icon = departmentIcons[index];
+                        return _buildDepartmentTile(data, context);
+                      },
+                      itemCount: snapshot.data!.length,
+                    ),
+                  ),
+                ],
+              );
+            }
+          }),
 
       // Add your bottom navigation bar here
       bottomNavigationBar: BottomNavigationBar(
@@ -162,10 +118,15 @@ class HomeScreen extends StatelessWidget {
         onTap: (index) {
           if (index == 1) {
             // Navigate to My Books screen
-            Navigator.of(context).pushNamed('/MyBooksScreen');
+            // Navigator.of(context).pushNamed('/MyBooksScreen');
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const MyBooksScreen()));
           } else if (index == 2) {
             // Navigate to Settings screen
-            Navigator.of(context).pushNamed('/SettingsScreen');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SettingsScreen()));
           }
           // Handle other navigation here if needed
         },
@@ -173,36 +134,16 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDepartmentTile(String name, IconData icon, BuildContext context) {
+  Widget _buildDepartmentTile(Course course, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (name == 'ICTechnology') {
-          // Navigate to the PDF viewer screen with the specified PDF file path
-          Navigator.of(context).pushNamed(
-            '/ICTDiplomaScreen',
-            arguments: '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/Apis.pdf',
-          );
-        } else {
-          // Navigate to the corresponding department screen
-          switch (name) {
-            case 'Com Engineering':
-              Navigator.of(context).pushNamed('/ComEngineerScreen');
-              break;
-            case 'EE Engineering':
-              Navigator.of(context).pushNamed('/ElectricalScreen');
-              break;
-            case 'Computer Science':
-              Navigator.of(context).pushNamed('/ComputerScienceScreen');
-              break;
-            case 'Information Technology Business':
-              Navigator.of(context).pushNamed('/InfoTechScreen');
-              break;
-            case 'Business Administration (DBA)':
-              Navigator.of(context).pushNamed('/BusAdminScreen');
-              break;
-            // Add cases for other departments here
-          }
-        }
+        //navigate to course details screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CourseDetails(course: course),
+          ),
+        );
       },
       child: Card(
         color: Color.fromARGB(244, 7, 43, 63),
@@ -219,13 +160,13 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                icon,
+                Icons.menu_book,
                 size: 40.0,
                 color: Color.fromARGB(255, 13, 1, 1),
               ),
               SizedBox(height: 5.0),
               Text(
-                name,
+                course.name,
                 style: TextStyle(
                   fontSize: 14.0,
                   fontWeight: FontWeight.bold,
@@ -238,5 +179,57 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-}
 
+  Future<List<Course>> getDocuments() async {
+    try {
+      final url = Uri.parse('http://192.168.1.5:8000/api/documents');
+
+      // Get the token from shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      final headers = {
+        'content-type': 'application/json',
+        'accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await http.get(url, headers: headers);
+
+      print("response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final dynamic responseData = jsonDecode(response.body)['data'];
+
+        List<Course> courses = [];
+
+        // Iterate through each course in the response
+        responseData.forEach((courseName, courseData) {
+          List<CourseUnit> courseUnits = [];
+
+          // Iterate through each course unit in the course data
+          courseData.forEach((courseUnitName, documents) {
+            List<Document> unitDocuments = [];
+
+            // Iterate through each document in the course unit
+            documents.forEach((document) {
+              unitDocuments.add(Document.fromJson(document));
+            });
+
+            courseUnits.add(
+                CourseUnit(name: courseUnitName, documents: unitDocuments));
+          });
+
+          courses.add(Course(name: courseName, course_units: courseUnits));
+        });
+
+        return courses;
+      } else {
+        throw Exception('Failed to load documents');
+      }
+    } catch (e) {
+      print("Error: $e");
+      return [];
+    }
+  }
+}

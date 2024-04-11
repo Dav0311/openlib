@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Authentication
 import 'package:openlibrary/HomeScreen.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInScreen extends StatefulWidget {
   @override
@@ -30,40 +33,43 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _login() async {
-    // Validate the form
     if (_formKey.currentState!.validate()) {
-      final registrationNumber = _registrationNumberController.text;
-      final password = _passwordController.text;
+      final url = Uri.parse('http://192.168.1.5:8000/api/login');
 
-      try {
-        // Sign in the user with Firebase Authentication
-        final userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: registrationNumber, password: password);
+      final headers = {
+        'content-type': 'application/json',
+        'accept': 'application/json',
+      };
 
-        // Check if the login was successful
-        if (userCredential.user != null) {
-          // Successful login
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Logged in successfully')),
-          );
+      final body = {
+        'reg_no': _registrationNumberController.text,
+        'password': _passwordController.text,
+      };
 
-          // Navigate to the home screen
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (BuildContext context) => HomeScreen(),
-            ),
-          );
-        } else {
-          // Failed login
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login failed')),
-          );
-        }
-      } on FirebaseAuthException catch (e) {
-        // Handle Firebase Authentication errors here
-        print('Firebase Authentication Error: ${e.message}');
+      final response =
+          await http.post(url, headers: headers, body: jsonEncode(body));
+
+          log("response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final response_data = jsonDecode(response.body);
+        final token = response_data['data']['token'];
+        final user = response_data['data']['user'];
+
+        // Save the token and user details to shared preferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('user', jsonEncode(user));
+
+        // Navigate to the home screen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (BuildContext context) => HomeScreen(),
+          ),
+        );
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${e.message}')),
+          SnackBar(content: Text('Login failed')),
         );
       }
     }
@@ -72,18 +78,6 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState() {
     super.initState();
-    
-    initializeFirebase ();
-
-  }
-
-  Future <void> initializeFirebase () async {
-    try{
-      await Firebase.initializeApp();
-      print("initialisation successful");
-    } catch (error){
-      print("initialisation error : $error");
-    }
   }
 
   @override
@@ -97,16 +91,15 @@ class _SignInScreenState extends State<SignInScreen> {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, 
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: 10.0),
               Image.asset(
-                '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/logo.png',
+                'assets/logo.png',
                 height: 180,
               ),
               SizedBox(height: 20.0),
-
               Form(
                 key: _formKey,
                 child: Column(
@@ -149,8 +142,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           onPressed: _login,
                           child: Text(
                             'Login',
-                            style: TextStyle(
-                                color: Colors.white),
+                            style: TextStyle(color: Colors.white),
                           ),
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(

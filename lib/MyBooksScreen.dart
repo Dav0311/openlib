@@ -1,50 +1,62 @@
+
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: MyBooksScreen(),
-  ));
+class MyBooksScreen extends StatefulWidget {
+  const MyBooksScreen({super.key});
+
+  @override
+  State<MyBooksScreen> createState() => _MyBooksScreenState();
 }
 
-class MyBooksScreen extends StatelessWidget {
+class _MyBooksScreenState extends State<MyBooksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Library'),
-        backgroundColor: Color.fromARGB(235, 3, 41, 67),
+        title: const Text('My Books'),
+        backgroundColor: const Color.fromARGB(235, 3, 41, 67),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
-     // body: DocumentsList(), // Use the DocumentsList widget to display PDFs
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      body: ListView(
+        children: [
+          buildListTile(
+            title: 'Book 1',
+            onTap: () {
+              // Handle Book 1 tap
+            },
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Library',
+          buildListTile(
+            title: 'Book 2',
+            onTap: () {
+              // Handle Book 2 tap
+            },
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+          buildListTile(
+            title: 'Book 3',
+            onTap: () {
+              // Handle Book 3 tap
+            },
+          ),
+          buildListTile(
+            title: 'Book 4',
+            onTap: () {
+              // Handle Book 4 tap
+            },
           ),
         ],
-        currentIndex: 1, // Set the current index for My Books
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/HomeScreen'); // Navigate to HomeScreen
-              break;
-            case 1:
-              // Do nothing, already on My Books
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/SettingsScreen'); // Navigate to SettingsScreen
-              break;
-          }
-        },
       ),
+    );
+  }
+  
+  buildListTile({required String title, required Null Function() onTap}) {
+    return ListTile(
+      title: Text(title),
+      onTap: onTap,
     );
   }
 }

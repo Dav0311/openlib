@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'SignInScreen.dart';
-import 'HomeScreen.dart';
-
-void main() {
-  runApp(MyApp());
-}
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);

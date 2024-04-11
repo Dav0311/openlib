@@ -1,45 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
 import 'package:openlibrary/HomeScreen.dart';
-import 'package:openlibrary/courseScreens/BusAdmin.dart';
-import 'package:openlibrary/courseScreens/ComEngineer.dart';
-import 'package:openlibrary/courseScreens/ComputerScience.dart';
-import 'package:openlibrary/courseScreens/Electrical.dart';
-import 'package:openlibrary/courseScreens/InfoTech.dart';
-import 'MyBooksScreen.dart';
-import 'courseScreens/ICTDiploma.dart';
-import 'SignInScreen.dart';
-import 'SettingsScreen.dart';
+import 'package:openlibrary/SignInScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure that Flutter is initialized
-  await Firebase.initializeApp(); // Initialize Firebase
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Ensure that Flutter is initialized
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      routes: {
-        '/SignInScreen': (context) => SignInScreen(), // Set SignInScreen as the initial route
-        '/HomeScreen': (context) => HomeScreen(),
-        '/MyBooksScreen': (context) => MyBooksScreen(),
-        '/SettingsScreen': (context) => SettingsScreen(),
-        '/ICTDiplomaScreen': (context) =>
-            ICTDiplomaScreen(pdfPath: '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/Apis.pdf'),
-        '/ComEngineerScreen': (context) =>
-            ComEngineerScreen(pdfPath: '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/Com.pdf',),
-        '/ElectricalScreen': (context) =>
-            ElectricalScreen(pdfPath: '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/data.pdf'),
-        '/ComputerScienceScreen': (context) =>
-            ComputerScienceScreen(pdfPath: '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/SQL.pdf',),
-        '/InfoTechScreen': (context) =>
-            InfoTechScreen(pdfPath: '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/C.pdf',),
-        '/BusAdminScreen': (context) =>
-            BusAdminScreen(pdfPath: '/Users/ronaldjjingo/Desktop/Development/openlibraryf/openlibrary/assets/buz.pdf',),
-      },
-      initialRoute: '/SignInScreen', // Set SignInScreen as the initial route
-    );
+    return FutureBuilder(
+        future: _determineInitialRoute(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            // return Text('Error: ${snapshot.error}');
+            return const Center(
+              child: Text("An error occurred. Please try again later"),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            // return const Text('No data available');
+            return const Center(
+              child: Column(
+                children: [
+                  Text("No data available"),
+                ],
+              ),
+            );
+          } else {
+            return MaterialApp(
+              routes: {
+                '/SignInScreen': (context) => SignInScreen(),
+                '/HomeScreen': (context) => HomeScreen(),
+              },
+              debugShowCheckedModeBanner: false,
+              initialRoute: snapshot.data ?? '/SignInScreen',
+            );
+          }
+        });
+  }
+
+  // Check if there is a token in the shared preferences
+  Future<String> _determineInitialRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return token != null ? '/HomeScreen' : '/SignInScreen';
   }
 }
