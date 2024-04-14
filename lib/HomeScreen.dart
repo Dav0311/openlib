@@ -182,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Course>> getDocuments() async {
     try {
-      final url = Uri.parse('http://192.168.1.5:8000/api/documents');
+      final url = Uri.parse('http://172.20.10.2/api/documents');
 
       // Get the token from shared preferences
       final prefs = await SharedPreferences.getInstance();
